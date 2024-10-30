@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 let container, camera, scene, renderer, cube, snowmanGroup, controls;
 
@@ -11,13 +13,17 @@ function init() {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    1000,
+
+    
   );
 
-  renderer = new THREE.WebGLRenderer();
+  renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(animate);
   document.body.appendChild(renderer.domElement);
+  renderer.toneMapping = THREE.LinearToneMapping;
+  renderer.outputEncoding = THREE.sRGBEncoding;
 
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshPhongMaterial({
@@ -108,6 +114,8 @@ function init() {
   controls.screenSpacePanning = false;
   controls.minDistance = 1;
   controls.maxDistance = 100;
+
+  loadmodels();
 }
 
 function animate() {
@@ -129,4 +137,21 @@ function resize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function loadmodels() {
+  new RGBELoader()
+    .setPath("hdri/")
+    .load("lonely_road_afternoon_puresky_1k.hdr", function (texture) {
+      scene.background = texture;
+      scene.environment = texture;
+
+      const loader = new GLTFLoader().setPath("shoe/");
+      loader.load("shoe.gltf", async function (gltf) {
+        const model = gltf.scene;
+        await renderer.compileAsync(model, scene, camera);
+
+        scene.add(model);
+      });
+    });
 }
