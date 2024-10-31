@@ -189,6 +189,24 @@ function loadmodels() {
         bottleModel.position.set(-0.1, 0.5, -0.1);
         scene.add(bottleModel);
       });
+
+        // Banana
+        const bananaLoader = new GLTFLoader().setPath("banana/");
+        bananaLoader.load("banana.gltf", async function (gltf) {
+          const bananaModel = gltf.scene;
+          await renderer.compileAsync(bananaModel, scene, camera);
+          
+          // Banana position
+          bananaModel.position.set(-0.1, 0.39, 0.1);
+          scene.add(bananaModel);
+
+          // Banana size
+          bananaModel.scale.set(0.003, 0.003, 0.003);
+
+          // Banana rotation
+          bananaModel.rotation.y = -0.5;
+
+        });
     });
 }
 
