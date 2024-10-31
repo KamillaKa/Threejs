@@ -94,7 +94,7 @@ function init() {
   snowmanGroup.position.set(0, 0.3, 0);
   scene.add(snowmanGroup);
 
-  cube.position.set(0.7, 0.05, 0);
+  cube.position.set(0.3, 1.03, 2.2);
 
   // Camera
   camera.position.set(4, 4, 4);
@@ -164,7 +164,7 @@ function loadmodels() {
         await renderer.compileAsync(shoeModel, scene, camera);
         
         // Shoe position
-        shoeModel.position.set(0, 0, 1);
+        shoeModel.position.set(0.5, 0.06, 2);
         scene.add(shoeModel);
       });
 
@@ -186,7 +186,7 @@ function loadmodels() {
         await renderer.compileAsync(bottleModel, scene, camera);
         
         // Bottle position
-        bottleModel.position.set(0.9, 0.13, 0);
+        bottleModel.position.set(0.3, 1.11, 2);
         scene.add(bottleModel);
       });
     });
