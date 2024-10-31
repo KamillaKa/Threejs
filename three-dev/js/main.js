@@ -25,7 +25,7 @@ function init() {
   renderer.toneMapping = THREE.LinearToneMapping;
   renderer.outputEncoding = THREE.sRGBEncoding;
 
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
   const material = new THREE.MeshPhongMaterial({
     color: 0x00ff00,
   });
@@ -47,27 +47,27 @@ function init() {
   });
 
   // Legs
-  const bottomGeometry = new THREE.SphereGeometry(0.75, 32, 32);
+  const bottomGeometry = new THREE.SphereGeometry(0.3, 12, 8);
   const bottomSphere = new THREE.Mesh(bottomGeometry, snowMaterial);
-  bottomSphere.position.set(0, -0.25, 0);
+  bottomSphere.position.set(0, -0.1, 0);
   snowmanGroup.add(bottomSphere);
 
   // Body
-  const middleGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+  const middleGeometry = new THREE.SphereGeometry(0.2, 12, 8);
   const middleSphere = new THREE.Mesh(middleGeometry, snowMaterial);
-  middleSphere.position.set(0, 0.75, 0);
+  middleSphere.position.set(0, 0.3, 0);
   snowmanGroup.add(middleSphere);
 
   // Head
-  const headGeometry = new THREE.SphereGeometry(0.35, 32, 32);
+  const headGeometry = new THREE.SphereGeometry(0.15, 12, 8);
   const headSphere = new THREE.Mesh(headGeometry, snowMaterial);
-  headSphere.position.set(0, 1.6, 0);
+  headSphere.position.set(0, 0.6, 0);
   snowmanGroup.add(headSphere);
 
   // Hat
-  const hatGeometry = new THREE.ConeGeometry(0.3, 0.7, 32);
+  const hatGeometry = new THREE.ConeGeometry(0.1, 0.3, 10);
   const hat = new THREE.Mesh(hatGeometry, hatMaterial);
-  hat.position.set(0, 2.1, 0);
+  hat.position.set(0, 0.9, 0);
   snowmanGroup.add(hat);
 
   const wireframeMaterial = new THREE.MeshBasicMaterial({
@@ -76,25 +76,25 @@ function init() {
   });
 
   const bottomWireframe = new THREE.Mesh(bottomGeometry, wireframeMaterial);
-  bottomWireframe.position.set(0, -0.25, 0);
+  bottomWireframe.position.set(0, -0.1, 0);
   snowmanGroup.add(bottomWireframe);
 
   const middleWireframe = new THREE.Mesh(middleGeometry, wireframeMaterial);
-  middleWireframe.position.set(0, 0.75, 0);
+  middleWireframe.position.set(0, 0.3, 0);
   snowmanGroup.add(middleWireframe);
 
   const headWireframe = new THREE.Mesh(headGeometry, wireframeMaterial);
-  headWireframe.position.set(0, 1.6, 0);
+  headWireframe.position.set(0, 0.6, 0);
   snowmanGroup.add(headWireframe);
 
   const hatWireframe = new THREE.Mesh(hatGeometry, wireframeMaterial);
-  hatWireframe.position.set(0, 2.1, 0);
+  hatWireframe.position.set(0, 0.9, 0);
   snowmanGroup.add(hatWireframe);
 
-  snowmanGroup.position.set(0, 0.75, 0);
+  snowmanGroup.position.set(0, 0.3, 0);
   scene.add(snowmanGroup);
 
-  cube.position.set(2, 1, 0);
+  cube.position.set(0.7, 0.05, 0);
 
   // Camera
   camera.position.set(4, 4, 4);
@@ -102,18 +102,29 @@ function init() {
   scene.add(axesHelper);
   camera.lookAt(axesHelper.position);
 
-  // Lights
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-  scene.add(directionalLight);
-
-  const light = new THREE.AmbientLight(0x404040); // soft white light
-  scene.add(light);
-
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.screenSpacePanning = false;
   controls.minDistance = 1;
   controls.maxDistance = 100;
+
+  // Lights
+
+  const light = new THREE.AmbientLight(0x404040); // soft white light
+  scene.add(light);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 2); 
+  directionalLight.position.set(5, 10, 5); 
+  directionalLight.castShadow = true; 
+  scene.add(directionalLight);
+
+  const pointLight = new THREE.PointLight(0xffccaa, 1.5, 10); 
+  pointLight.position.set(-2, 1, 3);
+  pointLight.castShadow = true; 
+  scene.add(pointLight);
+
+  const ambientLight = new THREE.AmbientLight(0x202020); 
+  scene.add(ambientLight);
 
   loadmodels();
 }
@@ -146,12 +157,38 @@ function loadmodels() {
       scene.background = texture;
       scene.environment = texture;
 
-      const loader = new GLTFLoader().setPath("shoe/");
-      loader.load("shoe.gltf", async function (gltf) {
-        const model = gltf.scene;
-        await renderer.compileAsync(model, scene, camera);
+      // Shoe
+      const shoeLoader = new GLTFLoader().setPath("shoe/");
+      shoeLoader.load("shoe.gltf", async function (gltf) {
+        const shoeModel = gltf.scene;
+        await renderer.compileAsync(shoeModel, scene, camera);
+        
+        // Shoe position
+        shoeModel.position.set(0, 0, 1);
+        scene.add(shoeModel);
+      });
 
-        scene.add(model);
+      // Barrel
+      const barrelLoader = new GLTFLoader().setPath("barrel/");
+      barrelLoader.load("barrel.gltf", async function (gltf) {
+        const barrelModel = gltf.scene;
+        await renderer.compileAsync(barrelModel, scene, camera);
+        
+        // Barrel position 
+        barrelModel.position.set(0, 0.5, 2);
+        scene.add(barrelModel);
+      });
+
+        // Bottle
+      const bottleLoader = new GLTFLoader().setPath("bottle/");
+      bottleLoader.load("WaterBottle.gltf", async function (gltf) {
+        const bottleModel = gltf.scene;
+        await renderer.compileAsync(bottleModel, scene, camera);
+        
+        // Bottle position
+        bottleModel.position.set(0.9, 0.13, 0);
+        scene.add(bottleModel);
       });
     });
 }
+
