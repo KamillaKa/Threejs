@@ -3,5 +3,6 @@ export default {
     publicDir: "../3d-assets",
     build: {
     outDir: "../dist"
-    }
+    },
+    base: "/~kamillka/Threejs"
    };
