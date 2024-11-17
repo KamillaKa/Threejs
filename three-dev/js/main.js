@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { VRButton } from "three/examples/jsm/Addons.js";
 
 let container, camera, scene, renderer, cube, snowmanGroup, controls;
 
@@ -24,6 +25,9 @@ function init() {
   document.body.appendChild(renderer.domElement);
   renderer.toneMapping = THREE.LinearToneMapping;
   renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.xr.enabled = true;
+
+  document.body.appendChild(VRButton.createButton(renderer));
 
   const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
   const material = new THREE.MeshPhongMaterial({
