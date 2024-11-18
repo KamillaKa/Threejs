@@ -3,8 +3,16 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { VRButton } from "three/examples/jsm/Addons.js";
+import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
 let container, camera, scene, renderer, cube, snowmanGroup, controls;
+
+let controller1, controller2;
+let controllerGrip1, controllerGrip2;
+let raycaster;
+const intersected = [];
+const tempMatrix = new THREE.Matrix4();
+let group;
 
 init();
 
@@ -15,19 +23,14 @@ function init() {
     window.innerWidth / window.innerHeight,
     0.1,
     1000,
-
-    
   );
 
   renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setAnimationLoop(animate);
+  // renderer.setAnimationLoop(animate);
   document.body.appendChild(renderer.domElement);
   renderer.toneMapping = THREE.LinearToneMapping;
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.xr.enabled = true;
-
-  document.body.appendChild(VRButton.createButton(renderer));
 
   const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
   const material = new THREE.MeshPhongMaterial({
@@ -131,9 +134,67 @@ function init() {
   scene.add(ambientLight);
 
   loadmodels();
+  initVR();
+
 }
 
-function animate() {
+function initVR() {
+  document.body.appendChild(VRButton.createButton(renderer));
+  renderer.xr.enabled = true;
+
+  // controllers
+
+  controller1 = renderer.xr.getController( 0 );
+  controller1.addEventListener( 'selectstart', onSelectStart );
+  controller1.addEventListener( 'selectend', onSelectEnd );
+  scene.add( controller1 );
+
+  controller2 = renderer.xr.getController( 1 );
+  controller2.addEventListener( 'selectstart', onSelectStart );
+  controller2.addEventListener( 'selectend', onSelectEnd );
+  scene.add( controller2 );
+
+  const controllerModelFactory = new XRControllerModelFactory();
+
+  controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+  controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+  scene.add( controllerGrip1 );
+
+  controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+  // controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+  const loader = new GLTFLoader().setPath("gundy/");
+  loader.load('scene.gltf', async function (gltf) {
+    gltf.scene.scale.set(0.0003, 0.0003, 0.0003);
+    let mymodel = gltf.scene;
+    mymodel.rotation.y = THREE.MathUtils.degToRad(180);
+    mymodel.rotation.x = THREE.MathUtils.degToRad(-36.5);
+    mymodel.position.set(0, 0.01, 0);
+    controllerGrip2.add(mymodel);
+  });
+  scene.add( controllerGrip2 );
+
+
+  function onSelectStart(event) {}
+  function onSelectEnd(event) {}
+
+  //
+
+  const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
+
+  const line = new THREE.Line( geometry );
+  line.name = 'line';
+  line.scale.z = 5;
+
+  controller1.add( line.clone() );
+  controller2.add( line.clone() );
+
+  raycaster = new THREE.Raycaster();
+}
+
+renderer.setAnimationLoop(function () {
+
+  controls.update();
+
   // Rotate the cube
   cube.rotation.x += 0.001;
   cube.rotation.y += 0.001;
@@ -144,7 +205,7 @@ function animate() {
 
   controls.update();
   renderer.render(scene, camera);
-}
+});
 
 window.addEventListener("resize", resize, false);
 

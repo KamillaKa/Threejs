@@ -2,7 +2,7 @@ export default {
     root: "three-dev",
     publicDir: "../3d-assets",
     build: {
-    outDir: "../dist"
+        outDir: "../dist"
     },
-    base: "/~kamillka/Threejs"
+    base: "/~kamillka/Threejs/"
    };
