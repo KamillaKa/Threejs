@@ -12,12 +12,14 @@ let controllerGrip1, controllerGrip2;
 let raycaster;
 const intersected = [];
 const tempMatrix = new THREE.Matrix4();
-let group;
+let group = new THREE.Group();
+group.name = 'Interaction-Group';
 
 init();
 
 function init() {
   scene = new THREE.Scene();
+  scene.add(group);
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -37,7 +39,7 @@ function init() {
     color: 0x00ff00,
   });
   cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+  group.add(cube);
 
   snowmanGroup = new THREE.Group();
 
@@ -99,7 +101,7 @@ function init() {
   snowmanGroup.add(hatWireframe);
 
   snowmanGroup.position.set(1, 0.3, 0);
-  scene.add(snowmanGroup);
+  group.add(snowmanGroup);
 
   cube.position.set(0.1, 0.4, -0.08);
 
@@ -173,10 +175,6 @@ function initVR() {
   });
   scene.add( controllerGrip2 );
 
-
-  function onSelectStart(event) {}
-  function onSelectEnd(event) {}
-
   //
 
   const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
@@ -191,9 +189,115 @@ function initVR() {
   raycaster = new THREE.Raycaster();
 }
 
-renderer.setAnimationLoop(function () {
+function onSelectStart( event ) {
 
+  const controller = event.target;
+
+  const intersections = getIntersections( controller );
+
+  if ( intersections.length > 0 ) {
+
+    const intersection = intersections[ 0 ];
+
+    const object = intersection.object;
+    // object.material.emissive.b = 1;
+  
+    controller.attach( object );
+
+    controller.userData.selected = object;
+
+  }
+
+  controller.userData.targetRayMode = event.data.targetRayMode;
+
+}
+
+function onSelectEnd( event ) {
+
+  const controller = event.target;
+
+  if ( controller.userData.selected !== undefined ) {
+
+    const object = controller.userData.selected;
+    // object.material.emissive.b = 0;
+    group.attach( object );
+
+    controller.userData.selected = undefined;
+
+  }
+}
+
+function getIntersections( controller ) {
+
+  controller.updateMatrixWorld();
+
+  raycaster.setFromXRController( controller );
+
+  return raycaster.intersectObjects(group.children, true);
+
+}
+
+function intersectObjects( controller ) {
+
+  // Do not highlight in mobile-ar
+
+  if ( controller.userData.targetRayMode === 'screen' ) return;
+
+  // Do not highlight when already selected
+
+  if ( controller.userData.selected !== undefined ) return;
+
+  const line = controller.getObjectByName( 'line' );
+  const intersections = getIntersections( controller );
+
+  if ( intersections.length > 0 ) {
+
+    const intersection = intersections[ 0 ];
+
+    const object = intersection.object;
+    // object.material.emissive.r = 1;
+    object.traverse(function (node) {
+      if (node.material) {
+        node.material.transparent = true;
+        node.material.opacity = 0.5;
+      }});
+
+    intersected.push( object );
+
+    line.scale.z = intersection.distance;
+
+  } else {
+
+    line.scale.z = 5;
+
+  }
+
+}
+
+function cleanIntersected() {
+
+  while ( intersected.length ) {
+
+    const object = intersected.pop();
+    object.traverse(function (node) {
+      if (node.material) {
+        node.material.transparent = false;
+        node.material.opacity = 1;
+      }});
+    // object.material.emissive.r = 0;
+
+  }
+
+}
+
+renderer.setAnimationLoop(function () {
+  
   controls.update();
+  
+  cleanIntersected();
+  intersectObjects(controller1);
+  intersectObjects(controller2);
+  
 
   // Rotate the cube
   cube.rotation.x += 0.001;
@@ -230,7 +334,7 @@ function loadmodels() {
         
         // Shoe position
         shoeModel.position.set(0.55, -0.55, 0.05);
-        scene.add(shoeModel);
+        group.add(shoeModel);
       });
 
       // Barrel
@@ -252,7 +356,7 @@ function loadmodels() {
         
         // Bottle position
         bottleModel.position.set(-0.1, 0.5, -0.1);
-        scene.add(bottleModel);
+        group.add(bottleModel);
       });
 
         // Banana
@@ -263,7 +367,7 @@ function loadmodels() {
           
           // Banana position
           bananaModel.position.set(-0.1, 0.39, 0.1);
-          scene.add(bananaModel);
+          group.add(bananaModel);
 
           // Banana size
           bananaModel.scale.set(0.003, 0.003, 0.003);
