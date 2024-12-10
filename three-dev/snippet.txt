@@ -1,0 +1,18 @@
+<model-viewer src="shark.gltf" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1">
+    <button class="Hotspot" slot="hotspot-3" data-position="0.16128127988797458m 1.5506415798500552m -0.42073230369911063m" data-normal="0.9577691668006161m 0.2795995981058152m -0.06709908989785406m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Dorsal Fin</div>
+    </button><button class="Hotspot" slot="hotspot-4" data-position="0.8877226022014987m 0.38174954105818865m -0.09788600264459113m" data-normal="0.7927506494668759m 0.6092257840990923m -0.019757321647752256m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Pectoral Fin</div>
+    </button><button class="Hotspot" slot="hotspot-5" data-position="0.3496540073908264m 0.8448720596323753m -2.7247183260821193m" data-normal="0.9699813967260468m 0.0881109986666285m 0.22665511668470475m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Caudal Fin</div>
+    </button>
+    <div class="progress-bar hide" slot="progress-bar">
+        <div class="update-bar"></div>
+    </div>
+    <button slot="ar-button" id="ar-button">
+        View in your space
+    </button>
+    <div id="ar-prompt">
+        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+    </div>
+</model-viewer>
